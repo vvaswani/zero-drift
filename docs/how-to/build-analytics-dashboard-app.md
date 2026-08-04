@@ -24,7 +24,7 @@ For the local playground:
 ```python
 client = AnalyticsClient(
     api_key="test-key",
-    base_url="http://localhost:8000/analytics"
+    base_url="http://localhost:8000/analytics/v1"
 )
 ```
 
@@ -55,6 +55,7 @@ A Dashboard is a collection of Widgets, each displaying the results of a Report 
 - `table`: Display results in a tabular format
 - `line`: Line chart (best for time-series data)
 - `bar`: Bar chart (good for comparisons)
+- `stacked`: Stacked bar chart (good for comparing parts of a whole)
 
 ## 3. Creating a Dashboard
 
@@ -112,7 +113,7 @@ else:
 **Widget fields:**
 - `title` (required): Widget title (displayed on dashboard)
 - `reportQuery` (required): ReportQuery object (see reporting guide for details)
-- `visualization` (optional): "table", "line", or "bar" (defaults to "table")
+- `visualization` (optional): "table", "line", "bar", or "stacked" (defaults to "table")
 
 ## 4. Listing Dashboards
 
