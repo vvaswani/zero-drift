@@ -4,15 +4,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'sdk/python/**'
-      - '.github/workflows/release-sdk.yml'
 
 permissions:
   contents: write
 
 jobs:
   release:
+    if: contains(github.event.head_commit.message, 'chore: regenerate SDK from OpenAPI specs')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
