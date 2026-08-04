@@ -55,6 +55,7 @@ A Dashboard is a collection of Widgets, each displaying the results of a Report 
 - `table`: Display results in a tabular format
 - `line`: Line chart (best for time-series data)
 - `bar`: Bar chart (good for comparisons)
+- `pie`: Pie chart (good for showing proportions)
 
 ## 3. Creating a Dashboard
 
@@ -112,7 +113,7 @@ else:
 **Widget fields:**
 - `title` (required): Widget title (displayed on dashboard)
 - `reportQuery` (required): ReportQuery object (see reporting guide for details)
-- `visualization` (optional): "table", "line", or "bar" (defaults to "table")
+- `visualization` (optional): "table", "line", "bar", or "pie" (defaults to "table")
 
 ## 4. Listing Dashboards
 
