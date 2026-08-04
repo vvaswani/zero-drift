@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'api/**'
-      - '.github/workflows/release-playground.yml'
 
 env:
   REGISTRY: ghcr.io

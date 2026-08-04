@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'sdk/python/**'
 
 permissions:
   contents: write
@@ -63,7 +65,7 @@ jobs:
           python -m build sdk/python
 
       - name: Check if tag exists
-        if: steps.check_sdk.outputs.sdk_updated == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.check_sdk.outputs.sdk_updated == 'true'
         id: check_tag
         run: |
           if git rev-parse "sdk-v${{ steps.version.outputs.VERSION }}" >/dev/null 2>&1; then
@@ -73,7 +75,7 @@ jobs:
           fi
 
       - name: Delete existing tag if needed
-        if: steps.check_sdk.outputs.sdk_updated == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_tag.outputs.exists == 'true'
+        if: steps.check_sdk.outputs.sdk_updated == 'true' && steps.check_tag.outputs.exists == 'true'
         run: |
           git tag -d "sdk-v${{ steps.version.outputs.VERSION }}"
           git push origin ":refs/tags/sdk-v${{ steps.version.outputs.VERSION }}" || true
