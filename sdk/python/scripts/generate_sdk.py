@@ -19,7 +19,7 @@ def generate_models(spec_path: Path, service_name: str) -> None:
     output_file = output_dir / "models.py"
 
     cmd = [
-        "datamodel-code-generator",
+        sys.executable, "-m", "datamodel_code_generator",
         "--input", str(spec_path),
         "--input-file-type", "openapi",
         "--output", str(output_file),
