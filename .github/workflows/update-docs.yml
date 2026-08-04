@@ -1,4 +1,4 @@
-name: Update Docs on Spec Change
+name: Update docs on spec change
 
 on:
   push:

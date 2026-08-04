@@ -1,4 +1,4 @@
-name: Release Analytics SDK
+name: Release SDK
 
 on:
   push:

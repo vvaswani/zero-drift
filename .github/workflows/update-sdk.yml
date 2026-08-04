@@ -1,4 +1,4 @@
-name: Update SDK on Spec Change
+name: Update SDK on spec change
 
 on:
   push:
