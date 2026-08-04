@@ -23,7 +23,7 @@ def generate_models(spec_path: Path, service_name: str) -> None:
         "--input", str(spec_path),
         "--input-file-type", "openapi",
         "--output", str(output_file),
-        "--target-python-version", "3.9",
+        "--target-python-version", "3.10",
     ]
 
     print(f"Generating models for {service_name}...")
