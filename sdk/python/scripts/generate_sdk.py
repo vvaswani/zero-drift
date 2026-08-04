@@ -95,55 +95,60 @@ def to_snake_case(camel_str: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-def bump_patch_version_if_changed() -> bool:
-    """Bump patch version if generated SDK code changed."""
-    repo_root = Path(__file__).parent.parent.parent
-    sdk_dir = repo_root / "sdk" / "python" / "analytics_sdk"
+def sync_version_with_spec(spec_path: Path) -> None:
+    """Set SDK version to match API spec version."""
+    import yaml
 
-    result = subprocess.run(
-        ["git", "diff", "--quiet", "--", str(sdk_dir)],
-        capture_output=True,
-        cwd=repo_root,
-    )
+    with open(spec_path) as f:
+        spec = yaml.safe_load(f)
 
-    if result.returncode == 0:
-        # No changes
-        return False
+    api_version = spec.get("info", {}).get("version", "0.1.0")
 
+    repo_root = Path(__file__).parent.parent.parent.parent
     pyproject_path = repo_root / "sdk" / "python" / "pyproject.toml"
-    with open(pyproject_path, "rb") as f:
-        pyproject = tomllib.load(f)
 
-    version = pyproject["project"]["version"]
-    parts = version.split(".")
-    parts[-1] = str(int(parts[-1]) + 1)
-    new_version = ".".join(parts)
-
-    with open(pyproject_path, "r") as f:
+    with open(pyproject_path) as f:
         content = f.read()
 
+    old_version = None
+    match = re.search(r'version = "([^"]+)"', content)
+    if match:
+        old_version = match.group(1)
+
     content = re.sub(
-        rf'version = "{re.escape(version)}"',
-        f'version = "{new_version}"',
+        r'version = "[^"]+"',
+        f'version = "{api_version}"',
         content,
+        count=1,
     )
 
     with open(pyproject_path, "w") as f:
         f.write(content)
 
-    print(f"✓ Bumped version {version} → {new_version}")
-    return True
+    if old_version and old_version != api_version:
+        print(f"✓ Synced SDK version {old_version} → {api_version} (from spec)")
+    else:
+        print(f"✓ SDK version {api_version} (from spec)")
 
 
 def main():
     """Generate SDK from all OpenAPI specs in api/."""
-    repo_root = Path(__file__).parent.parent.parent
+    repo_root = Path(__file__).parent.parent.parent.parent
     api_dir = repo_root / "api"
+
+    if not api_dir.exists():
+        print(f"ERROR: api/ directory not found at {api_dir}")
+        print(f"Script location: {Path(__file__)}")
+        print(f"Repo root: {repo_root}")
+        sys.exit(1)
 
     specs = list(api_dir.glob("*.yaml"))
     if not specs:
-        print("No OpenAPI specs found in api/")
+        print(f"No OpenAPI specs found in {api_dir}")
+        print(f"Available files: {list(api_dir.iterdir())}")
         sys.exit(1)
+
+    print(f"Found {len(specs)} spec(s): {[s.name for s in specs]}")
 
     for spec_path in specs:
         service_name = spec_path.stem
@@ -152,7 +157,7 @@ def main():
         generate_models(spec_path, service_name)
         generate_service_wrapper(spec_path, service_name, service_module)
 
-    bump_patch_version_if_changed()
+        sync_version_with_spec(spec_path)
 
 
 if __name__ == "__main__":

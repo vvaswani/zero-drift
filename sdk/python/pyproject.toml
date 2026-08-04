@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "analytics-sdk"
-version = "0.1.0"
-description = "Python SDK for the Analytics API"
+version = "1.0.0"
+description = "Python SDK for the Analytics API (version synced to API spec)"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
