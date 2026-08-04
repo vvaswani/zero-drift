@@ -1,0 +1,113 @@
+name: Release Analytics SDK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'sdk/python/**'
+      - '.github/workflows/release-sdk.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build tomli
+
+      - name: Extract version from pyproject.toml
+        id: version
+        run: |
+          python3 << 'EOF'
+          import os
+          try:
+              import tomllib
+          except ImportError:
+              import tomli as tomllib
+
+          with open('sdk/python/pyproject.toml', 'rb') as f:
+              pyproject = tomllib.load(f)
+
+          version_string = pyproject['project']['version']
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'VERSION={version_string}\n')
+          EOF
+        shell: bash
+
+      - name: Build package
+        run: |
+          python -m build sdk/python
+
+      - name: Check if tag exists
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: check_tag
+        run: |
+          if git rev-parse "sdk-v${{ steps.version.outputs.VERSION }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Delete existing tag if needed
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_tag.outputs.exists == 'true'
+        run: |
+          git tag -d "sdk-v${{ steps.version.outputs.VERSION }}"
+          git push origin ":refs/tags/sdk-v${{ steps.version.outputs.VERSION }}" || true
+
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: sdk-v${{ steps.version.outputs.VERSION }}
+          release_name: Analytics SDK v${{ steps.version.outputs.VERSION }}
+          body: |
+            Released analytics-sdk v${{ steps.version.outputs.VERSION }}
+
+            Install from the wheel:
+            ```bash
+            pip install https://github.com/${{ github.repository }}/releases/download/sdk-v${{ steps.version.outputs.VERSION }}/analytics_sdk-${{ steps.version.outputs.VERSION }}-py3-none-any.whl
+            ```
+
+            Or from the source distribution:
+            ```bash
+            pip install https://github.com/${{ github.repository }}/releases/download/sdk-v${{ steps.version.outputs.VERSION }}/analytics_sdk-${{ steps.version.outputs.VERSION }}.tar.gz
+            ```
+
+      - name: Upload wheel asset
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./sdk/python/dist/analytics_sdk-${{ steps.version.outputs.VERSION }}-py3-none-any.whl
+          asset_name: analytics_sdk-${{ steps.version.outputs.VERSION }}-py3-none-any.whl
+          asset_content_type: application/octet-stream
+
+      - name: Upload sdist asset
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./sdk/python/dist/analytics_sdk-${{ steps.version.outputs.VERSION }}.tar.gz
+          asset_name: analytics_sdk-${{ steps.version.outputs.VERSION }}.tar.gz
+          asset_content_type: application/gzip

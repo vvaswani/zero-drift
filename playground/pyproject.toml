@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "analytics-playground"
+version = "1.0.0"
+description = "Mock playground for the Analytics API"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+]

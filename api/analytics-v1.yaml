@@ -1,0 +1,964 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Analytics API
+servers:
+  - url: https://api.example.com/analytics/v1
+paths:
+  /properties:
+    post:
+      summary: Create property
+      operationId: createProperty
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyCreateRequest'
+      responses:
+        '201':
+          description: Property created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: List properties
+      operationId: listProperties
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertiesList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /properties/{propertyID}:
+    get:
+      summary: Get property
+      operationId: getProperty
+      parameters:
+        - name: propertyID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+      responses:
+        '200':
+          description: Property details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /properties/{propertyID}/events:
+    post:
+      summary: Ingest analytics events
+      operationId: ingestEvents
+      parameters:
+        - name: propertyID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventIngestRequest'
+      responses:
+        '202':
+          description: Events accepted for ingestion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventIngestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: List analytics events
+      operationId: listEvents
+      parameters:
+        - name: propertyID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: eventName
+          in: query
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: country
+          in: query
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /properties/{propertyID}/reports:
+    post:
+      summary: Submit report query
+      operationId: submitReport
+      parameters:
+        - name: propertyID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportQuery'
+      responses:
+        '201':
+          description: Report job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportJob'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: List report jobs
+      operationId: listReports
+      parameters:
+        - name: propertyID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of report jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportJobsList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /properties/{propertyID}/reports/{reportID}:
+    get:
+      summary: Get report job status
+      operationId: getReport
+      parameters:
+        - name: propertyID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+        - name: reportID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+      responses:
+        '200':
+          description: Report job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportJob'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /properties/{propertyID}/reports/{reportID}/results:
+    get:
+      summary: Get report results
+      description: Returns paginated report results. Only available once the report job status is COMPLETED. If the job is still in progress (PENDING or RUNNING), returns 400 Bad Request.
+      operationId: getReportResults
+      parameters:
+        - name: propertyID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+        - name: reportID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 1000
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /dashboards:
+    post:
+      summary: Create dashboard
+      operationId: createDashboard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DashboardCreateRequest'
+      responses:
+        '201':
+          description: Dashboard created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: List dashboards
+      operationId: listDashboards
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of dashboards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardsList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /dashboards/{dashboardID}:
+    get:
+      summary: Get dashboard
+      operationId: getDashboard
+      parameters:
+        - name: dashboardID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+      responses:
+        '200':
+          description: Dashboard details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      summary: Update dashboard
+      operationId: updateDashboard
+      parameters:
+        - name: dashboardID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DashboardUpdateRequest'
+      responses:
+        '200':
+          description: Dashboard updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete dashboard
+      operationId: deleteDashboard
+      parameters:
+        - name: dashboardID
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceID'
+      responses:
+        '204':
+          description: Dashboard deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+      required:
+        - code
+        - message
+      additionalProperties: false
+    ResourceID:
+      type: string
+      format: uuid
+      description: A resource identifier
+    Property:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        name:
+          type: string
+          description: Human-readable property name
+        contractID:
+          $ref: '#/components/schemas/ResourceID'
+          description: Billing and permissions scope
+        timezone:
+          type: string
+          description: IANA timezone name (e.g., Europe/Helsinki)
+        createdAt:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp
+          example: '2006-01-02T15:04:05Z07:00'
+        updatedAt:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp
+          example: '2006-01-02T15:04:05Z07:00'
+      required:
+        - id
+        - name
+        - contractID
+        - createdAt
+        - updatedAt
+      additionalProperties: false
+    PropertyCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Human-readable property name
+        contractID:
+          $ref: '#/components/schemas/ResourceID'
+          description: Billing and permissions scope
+        timezone:
+          type: string
+          description: IANA timezone name (e.g., Europe/Helsinki)
+      required:
+        - name
+        - contractID
+      additionalProperties: false
+    PropertiesList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+        cursor:
+          type: string
+          description: Cursor token for pagination
+      required:
+        - data
+      additionalProperties: false
+    Event:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        eventName:
+          type: string
+          description: Name of the event (e.g., page_view, session_start)
+        timestamp:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp when event occurred
+          example: '2006-01-02T15:04:05Z07:00'
+        userID:
+          type: string
+          description: Client-supplied end-user or session identifier
+        sessionID:
+          type: string
+          description: Session identifier
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2 country code
+        deviceType:
+          type: string
+          enum:
+            - desktop
+            - mobile
+            - tablet
+          description: Device type
+        pagePath:
+          type: string
+          description: Page path (e.g., /pricing)
+        properties:
+          type: object
+          description: Custom event properties
+          additionalProperties:
+            type: string
+      required:
+        - id
+        - eventName
+        - timestamp
+      additionalProperties: false
+    EventInput:
+      type: object
+      properties:
+        eventName:
+          type: string
+          description: Name of the event (e.g., page_view, session_start)
+        timestamp:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp when event occurred
+          example: '2006-01-02T15:04:05Z07:00'
+        userID:
+          type: string
+          description: Client-supplied end-user or session identifier
+        sessionID:
+          type: string
+          description: Session identifier
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2 country code
+        deviceType:
+          type: string
+          enum:
+            - desktop
+            - mobile
+            - tablet
+          description: Device type
+        pagePath:
+          type: string
+          description: Page path (e.g., /pricing)
+        properties:
+          type: object
+          description: Custom event properties
+          additionalProperties:
+            type: string
+      required:
+        - eventName
+        - timestamp
+      additionalProperties: false
+    EventIngestRequest:
+      type: object
+      properties:
+        events:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/EventInput'
+      required:
+        - events
+      additionalProperties: false
+    EventIngestResponse:
+      type: object
+      properties:
+        accepted:
+          type: integer
+          description: Count of events accepted for ingestion
+      required:
+        - accepted
+      additionalProperties: false
+    EventsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        cursor:
+          type: string
+          description: Cursor token for pagination
+      required:
+        - data
+      additionalProperties: false
+    Dimension:
+      type: string
+      enum:
+        - date
+        - country
+        - deviceType
+        - pagePath
+        - eventName
+      description: A dimension to group report results by
+    Metric:
+      type: string
+      enum:
+        - sessions
+        - pageviews
+        - users
+        - bounceRate
+        - eventCount
+      description: A metric to aggregate in report results
+    DateRange:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+          description: Start date (YYYY-MM-DD)
+          example: '2026-07-01'
+        endDate:
+          type: string
+          format: date
+          description: End date (YYYY-MM-DD)
+          example: '2026-07-31'
+      required:
+        - startDate
+        - endDate
+      additionalProperties: false
+    ReportFilter:
+      type: object
+      properties:
+        dimension:
+          $ref: '#/components/schemas/Dimension'
+        eq:
+          type: string
+          description: Exact match filter value
+        in:
+          type: array
+          items:
+            type: string
+          description: Match any of the provided values
+      required:
+        - dimension
+      description: Exactly one of 'eq' or 'in' must be provided
+      additionalProperties: false
+    ReportQuery:
+      type: object
+      properties:
+        dimensions:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Dimension'
+          description: Dimensions to group results by
+        metrics:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Metric'
+          description: Metrics to aggregate
+        dateRange:
+          $ref: '#/components/schemas/DateRange'
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportFilter'
+          description: Filters to apply to the report
+        limit:
+          type: integer
+          default: 1000
+          description: Maximum rows to return
+      required:
+        - dimensions
+        - metrics
+        - dateRange
+      additionalProperties: false
+    ReportJobStatus:
+      type: string
+      enum:
+        - PENDING
+        - RUNNING
+        - COMPLETED
+        - FAILED
+      description: Status of a report generation job
+    ReportJob:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        propertyID:
+          $ref: '#/components/schemas/ResourceID'
+        status:
+          $ref: '#/components/schemas/ReportJobStatus'
+        query:
+          $ref: '#/components/schemas/ReportQuery'
+          description: Echo of the submitted report query
+        createdAt:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp
+          example: '2006-01-02T15:04:05Z07:00'
+        updatedAt:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp
+          example: '2006-01-02T15:04:05Z07:00'
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: RFC 3339 timestamp when job completed or failed
+          example: '2006-01-02T15:04:05Z07:00'
+        errorMessage:
+          type: string
+          description: Error message if status is FAILED
+      required:
+        - id
+        - propertyID
+        - status
+        - query
+        - createdAt
+        - updatedAt
+      additionalProperties: false
+    ReportJobsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportJob'
+        cursor:
+          type: string
+          description: Cursor token for pagination
+      required:
+        - data
+      additionalProperties: false
+    ReportRow:
+      type: object
+      properties:
+        dimensions:
+          type: object
+          description: Dimension values for this row
+          additionalProperties:
+            type: string
+        metrics:
+          type: object
+          description: Metric values for this row
+          additionalProperties:
+            type: number
+      required:
+        - dimensions
+        - metrics
+      additionalProperties: false
+    ReportResult:
+      type: object
+      properties:
+        reportID:
+          $ref: '#/components/schemas/ResourceID'
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportRow'
+        cursor:
+          type: string
+          description: Cursor token for pagination
+        totalRows:
+          type: integer
+          description: Total rows matching the report query across all pages
+      required:
+        - reportID
+        - rows
+      additionalProperties: false
+    DashboardWidget:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+          description: Server-assigned widget identifier
+        title:
+          type: string
+          description: Widget title
+        reportQuery:
+          $ref: '#/components/schemas/ReportQuery'
+        visualization:
+          type: string
+          enum:
+            - table
+            - line
+            - bar
+          default: table
+          description: Visualization type
+      required:
+        - title
+        - reportQuery
+      additionalProperties: false
+    Dashboard:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceID'
+        name:
+          type: string
+          description: Dashboard name
+        contractID:
+          $ref: '#/components/schemas/ResourceID'
+        widgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardWidget'
+        createdAt:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp
+          example: '2006-01-02T15:04:05Z07:00'
+        updatedAt:
+          type: string
+          format: date-time
+          description: RFC 3339 timestamp
+          example: '2006-01-02T15:04:05Z07:00'
+      required:
+        - id
+        - name
+        - contractID
+        - widgets
+        - createdAt
+        - updatedAt
+      additionalProperties: false
+    DashboardCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Dashboard name
+        contractID:
+          $ref: '#/components/schemas/ResourceID'
+        widgets:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DashboardWidget'
+      required:
+        - name
+        - contractID
+        - widgets
+      additionalProperties: false
+    DashboardUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Dashboard name
+        widgets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardWidget'
+      additionalProperties: false
+    DashboardsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dashboard'
+        cursor:
+          type: string
+          description: Cursor token for pagination
+      required:
+        - data
+      additionalProperties: false
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+security:
+  - ApiKeyAuth: []
