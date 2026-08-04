@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 1.0.1
+  version: 1.0.2
   title: Analytics API
 servers:
   - url: https://api.example.com/analytics/v1
@@ -849,7 +849,6 @@ components:
             - table
             - line
             - bar
-            - pie
           default: table
           description: Visualization type
       required:
