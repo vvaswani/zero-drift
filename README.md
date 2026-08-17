@@ -68,18 +68,6 @@ cd sdk/python
 python scripts/generate_sdk.py
 ```
 
-### Run the playground
-
-```bash
-cd playground
-pip install -e .
-python -m app.main
-```
-
-Then open:
-
-- `http://localhost:8000/analytics/docs`
-
 ## Notes
 
 - This repository is designed to demonstrate propagation of changes from a master source file through docs, SDKs, and release automation.
